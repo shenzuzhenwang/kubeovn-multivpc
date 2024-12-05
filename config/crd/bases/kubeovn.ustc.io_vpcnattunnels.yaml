@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: vpcnattunnels.kubeovn.ustc.io
+  name: vpcnattunnels.xcl.example.io
 spec:
-  group: kubeovn.ustc.io
+  group: xcl.example.io
   names:
     kind: VpcNatTunnel
     listKind: VpcNatTunnelList

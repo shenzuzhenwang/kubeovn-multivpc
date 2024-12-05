@@ -119,7 +119,7 @@ func main() {
 		WebhookServer:          webhookServer,
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       "a18cab20.ustc.io",
+		LeaderElectionID:       "a18cab20.example.io",
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")

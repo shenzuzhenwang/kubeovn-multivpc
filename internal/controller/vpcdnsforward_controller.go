@@ -41,9 +41,9 @@ type VpcDnsForwardReconciler struct {
 	Config *rest.Config
 }
 
-//+kubebuilder:rbac:groups=kubeovn.ustc.io,resources=vpcdnsforwards,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=kubeovn.ustc.io,resources=vpcdnsforwards/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=kubeovn.ustc.io,resources=vpcdnsforwards/finalizers,verbs=update
+//+kubebuilder:rbac:groups=example.io,resources=vpcdnsforwards,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=example.io,resources=vpcdnsforwards/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=example.io,resources=vpcdnsforwards/finalizers,verbs=update
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
@@ -64,8 +64,8 @@ func (r *VpcDnsForwardReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 }
 
 func (r *VpcDnsForwardReconciler) handleCreateOrUpdate(ctx context.Context, vpcDns *kubeovnv1.VpcDnsForward) (ctrl.Result, error) {
-	if !containsString(vpcDns.ObjectMeta.Finalizers, "dns.finalizer.ustc.io") {
-		controllerutil.AddFinalizer(vpcDns, "dns.finalizer.ustc.io")
+	if !containsString(vpcDns.ObjectMeta.Finalizers, "dns.finalizer.example.io") {
+		controllerutil.AddFinalizer(vpcDns, "dns.finalizer.example.io")
 		err := r.Update(ctx, vpcDns)
 		if err != nil {
 			log.Log.Error(err, "Error Update VpcDnsForward")
@@ -77,24 +77,24 @@ func (r *VpcDnsForwardReconciler) handleCreateOrUpdate(ctx context.Context, vpcD
 		log.Log.Error(err, "Error createDnsConnection to VpcDnsForward")
 		return ctrl.Result{}, err
 	}
-	log.Log.Info("创建 VpcDnsForward 成功: " + vpcDns.ObjectMeta.Name)
+	log.Log.Info("create VpcDnsForward success: " + vpcDns.ObjectMeta.Name)
 	return ctrl.Result{}, nil
 }
 
 func (r *VpcDnsForwardReconciler) handleDelete(ctx context.Context, vpcDns *kubeovnv1.VpcDnsForward) (ctrl.Result, error) {
-	if containsString(vpcDns.ObjectMeta.Finalizers, "dns.finalizer.ustc.io") {
+	if containsString(vpcDns.ObjectMeta.Finalizers, "dns.finalizer.example.io") {
 		err := r.deleteDnsConnection(ctx, vpcDns)
 		if err != nil {
 			log.Log.Error(err, "Error deleteDnsConnection to VpcDnsForward")
 			return ctrl.Result{}, err
 		}
-		controllerutil.RemoveFinalizer(vpcDns, "dns.finalizer.ustc.io")
+		controllerutil.RemoveFinalizer(vpcDns, "dns.finalizer.example.io")
 		err = r.Update(ctx, vpcDns)
 		if err != nil {
 			log.Log.Error(err, "Error Update VpcDnsForward")
 			return ctrl.Result{}, err
 		}
-		log.Log.Info("删除 VpcDnsForward 成功: " + vpcDns.ObjectMeta.Name)
+		log.Log.Info("delete VpcDnsForward success: " + vpcDns.ObjectMeta.Name)
 	}
 	return ctrl.Result{}, nil
 }

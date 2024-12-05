@@ -1,10 +1,10 @@
-apiVersion: "kubeovn.ustc.io/v1"
+apiVersion: "xcl.example.io/v1"
 kind: VpcNatTunnel
 metadata:
   name: gre1
   namespace: ns2
 spec:
-  remoteCluster: "cluster2"      #对端集群
-  remoteVpc: "test-vpc-2"        #对端集群 vpc
-  interfaceAddr: "10.100.0.1/24" #隧道地址
-  localVpc: "test-vpc-2"         #本集群 vpc
+  remoteCluster: "cluster2"      
+  remoteVpc: "test-vpc-2"         
+  interfaceAddr: "10.100.0.1/24" 
+  localVpc: "test-vpc-2"         

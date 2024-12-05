@@ -1,4 +1,4 @@
-apiVersion: kubeovn.ustc.io/v1
+apiVersion: xcl.example.io/v1
 kind: VpcDnsForward
 metadata:
   labels:

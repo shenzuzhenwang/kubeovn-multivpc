@@ -38,9 +38,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-//+kubebuilder:rbac:groups=kubeovn.ustc.io,resources=gatewayexips,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=kubeovn.ustc.io,resources=gatewayexips/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=kubeovn.ustc.io,resources=gatewayexips/finalizers,verbs=update
+//+kubebuilder:rbac:groups=example.io,resources=gatewayexips,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=example.io,resources=gatewayexips/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=example.io,resources=gatewayexips/finalizers,verbs=update
 //+kubebuilder:rbac:groups=submariner.io,resources=servicediscoveries,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=submariner.io,resources=clusters,verbs=get;list;watch;create;update;patch;delete
 
@@ -133,7 +133,7 @@ func (c *Controller) Start(ctx context.Context) error {
 // operate before local to Broker
 func (c *Controller) onLocalGatewayExIp(obj runtime.Object, _ int, op syncer.Operation) (runtime.Object, bool) {
 	gatewayExIp := obj.(*kubeovnv1.GatewayExIp)
-	if gatewayExIp.Namespace == "submariner-k8s-broker" {
+	if gatewayExIp.Namespace == "k8s-broker" {
 		return nil, false
 	}
 	return gatewayExIp, false

@@ -2,7 +2,7 @@
 # This file is used to track the info used to scaffold your project
 # and allow the plugins properly work.
 # More info: https://book.kubebuilder.io/reference/project-config.html
-domain: ustc.io
+domain: example.io
 layout:
 - go.kubebuilder.io/v4
 projectName: kubeovn-multivpc
@@ -12,7 +12,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: ustc.io
+  domain: exmaple.io
   group: kubeovn
   kind: GatewayExIp
   path: kubeovn-multivpc/api/v1
@@ -21,7 +21,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: ustc.io
+  domain: example.io
   group: kubeovn
   kind: VpcNatTunnel
   path: kubeovn-multivpc/api/v1
@@ -30,7 +30,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: ustc.io
+  domain: example.io
   group: kubeovn
   kind: VpcDnsForward
   path: kubeovn-multivpc/api/v1

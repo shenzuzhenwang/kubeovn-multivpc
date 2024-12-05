@@ -120,7 +120,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - kubeovn.ustc.io
+  - xcl.example.io
   resources:
   - gatewayexips
   verbs:
@@ -132,13 +132,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - kubeovn.ustc.io
+  - xcl.example.io
   resources:
   - gatewayexips/finalizers
   verbs:
   - update
 - apiGroups:
-  - kubeovn.ustc.io
+  - xcl.example.io
   resources:
   - gatewayexips/status
   verbs:
@@ -146,7 +146,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - kubeovn.ustc.io
+  - xcl.example.io
   resources:
   - vpcdnsforwards
   verbs:
@@ -158,13 +158,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - kubeovn.ustc.io
+  - xcl.example.io
   resources:
   - vpcdnsforwards/finalizers
   verbs:
   - update
 - apiGroups:
-  - kubeovn.ustc.io
+  - xcl.example.io
   resources:
   - vpcdnsforwards/status
   verbs:
@@ -172,7 +172,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - kubeovn.ustc.io
+  - xcl.example.io
   resources:
   - vpcnattunnels
   verbs:
@@ -184,13 +184,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - kubeovn.ustc.io
+  - xcl.example.io
   resources:
   - vpcnattunnels/finalizers
   verbs:
   - update
 - apiGroups:
-  - kubeovn.ustc.io
+  - xcl.example.io
   resources:
   - vpcnattunnels/status
   verbs:

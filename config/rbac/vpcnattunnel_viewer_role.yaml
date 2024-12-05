@@ -12,7 +12,7 @@ metadata:
   name: vpcnattunnel-viewer-role
 rules:
 - apiGroups:
-  - kubeovn.ustc.io
+  - xcl.example.io
   resources:
   - vpcnattunnels
   verbs:
@@ -20,7 +20,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - kubeovn.ustc.io
+  - xcl.example.io
   resources:
   - vpcnattunnels/status
   verbs:

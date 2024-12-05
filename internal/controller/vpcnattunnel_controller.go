@@ -49,9 +49,9 @@ type VpcNatTunnelReconciler struct {
 	tunnelOpFact *factory.TunnelOperationFactory
 }
 
-//+kubebuilder:rbac:groups=kubeovn.ustc.io,resources=vpcnattunnels,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=kubeovn.ustc.io,resources=vpcnattunnels/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=kubeovn.ustc.io,resources=vpcnattunnels/finalizers,verbs=update
+//+kubebuilder:rbac:groups=example.io,resources=vpcnattunnels,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=example.io,resources=vpcnattunnels/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=example.io,resources=vpcnattunnels/finalizers,verbs=update
 //+kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=core,resources=pods/exec,verbs=get;create
 //+kubebuilder:rbac:groups=submariner.io,resources=gateways,verbs=get;list;watch;
@@ -159,7 +159,6 @@ func getNatGwPod(name string, c client.Client) (*corev1.Pod, error) {
 }
 
 func (r *VpcNatTunnelReconciler) getGlobalnetCIDR() (string, error) {
-	// 找到本集群的GlobalNetCIDR
 	submarinerCluster := &Submariner.Cluster{}
 	err := r.Client.Get(context.Background(), client.ObjectKey{
 		Namespace: "submariner-operator",
@@ -202,12 +201,9 @@ func genCreateTunnelCmd(tunnelOpFact *factory.TunnelOperationFactory, tunnel *ku
 }
 
 func genGlobalnetRoute(vpcTunnel *kubeovnv1.VpcNatTunnel) string {
-	// 入流量转发给ovn网关(逻辑交换机)
 	InFlowRoute := fmt.Sprintf("ip route add %s via %s dev eth0", vpcTunnel.Status.GlobalnetCIDR, vpcTunnel.Status.OvnGwIP)
-	// 跨集群流量路由至隧道
 	OutFlowRoute := fmt.Sprintf("ip route add %s dev %s", vpcTunnel.Status.RemoteGlobalnetCIDR, vpcTunnel.Name)
 
-	// 创建snat，将跨集群流量数据包源地址修改为ClusterGlobalEgressIP(globalnet cidr前8个)
 	SNAT := fmt.Sprintf("iptables -t nat -A POSTROUTING -d %s -j SNAT --to-source %s-%s", vpcTunnel.Status.RemoteGlobalnetCIDR, vpcTunnel.Status.GlobalEgressIP[0], vpcTunnel.Status.GlobalEgressIP[len(vpcTunnel.Status.GlobalEgressIP)-1])
 	return InFlowRoute + ";" + OutFlowRoute + ";" + SNAT
 }
@@ -225,14 +221,13 @@ func genDeleteTunnelCmd(tunnelOpFact *factory.TunnelOperationFactory, tunnel *ku
 }
 
 func (r *VpcNatTunnelReconciler) handleCreateOrUpdate(ctx context.Context, vpcTunnel *kubeovnv1.VpcNatTunnel) (ctrl.Result, error) {
-	if !containsString(vpcTunnel.ObjectMeta.Finalizers, "tunnel.finalizer.ustc.io") {
-		controllerutil.AddFinalizer(vpcTunnel, "tunnel.finalizer.ustc.io")
+	if !containsString(vpcTunnel.ObjectMeta.Finalizers, "tunnel.finalizer.example.io") {
+		controllerutil.AddFinalizer(vpcTunnel, "tunnel.finalizer.example.io")
 		err := r.Update(ctx, vpcTunnel)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 	}
-	// 获取 VpcNatTunnel 对应的对端 GatewayExIp
 	remoteGatewayExIp := &kubeovnv1.GatewayExIp{}
 	err := r.Client.Get(ctx, client.ObjectKey{
 		Name:      vpcTunnel.Spec.RemoteVpc + "." + vpcTunnel.Spec.RemoteCluster,
@@ -244,7 +239,6 @@ func (r *VpcNatTunnelReconciler) handleCreateOrUpdate(ctx context.Context, vpcTu
 	}
 	// first build tunnel
 	if !vpcTunnel.Status.Initialized {
-		// 通过 localVpc 找到对应的 gatewayExIp, 从而找到当前正在使用的 Gateway
 		localGatewayExIp := &kubeovnv1.GatewayExIp{}
 		err := r.Client.Get(ctx, client.ObjectKey{
 			Name:      vpcTunnel.Spec.LocalVpc + "." + r.ClusterId,
@@ -320,7 +314,7 @@ func (r *VpcNatTunnelReconciler) handleCreateOrUpdate(ctx context.Context, vpcTu
 			log.Log.Error(err, "Error Update vpcTunnel")
 			return ctrl.Result{}, err
 		}
-		log.Log.Info("创建 VpcNatTunnel 成功: " + vpcTunnel.Name)
+		log.Log.Info("create VpcNatTunnel success: " + vpcTunnel.Name)
 		// if ClusterId or GatewayName update, then gatewayExIp.Spec.ExternalIP or gatewayExIp.Spec.GlobalNetCIDR will update too
 	} else if vpcTunnel.Status.RemoteIP != vpcTunnel.Spec.RemoteIP || vpcTunnel.Status.InternalIP != vpcTunnel.Spec.InternalIP ||
 		vpcTunnel.Status.InterfaceAddr != vpcTunnel.Spec.InterfaceAddr || vpcTunnel.Status.LocalGw != vpcTunnel.Spec.LocalGw ||
@@ -399,13 +393,13 @@ func (r *VpcNatTunnelReconciler) handleCreateOrUpdate(ctx context.Context, vpcTu
 				return ctrl.Result{}, err
 			}
 		}
-		log.Log.Info("更新 VpcNatTunnel 成功: " + vpcTunnel.Name)
+		log.Log.Info("update VpcNatTunnel success: " + vpcTunnel.Name)
 	}
 	return ctrl.Result{}, nil
 }
 
 func (r *VpcNatTunnelReconciler) handleDelete(ctx context.Context, vpcTunnel *kubeovnv1.VpcNatTunnel) (ctrl.Result, error) {
-	if containsString(vpcTunnel.ObjectMeta.Finalizers, "tunnel.finalizer.ustc.io") {
+	if containsString(vpcTunnel.ObjectMeta.Finalizers, "tunnel.finalizer.example.io") {
 
 		// delete route and tunnel
 		gwPod, err := getNatGwPod(vpcTunnel.Status.LocalGw, r.Client)
@@ -424,13 +418,13 @@ func (r *VpcNatTunnelReconciler) handleDelete(ctx context.Context, vpcTunnel *ku
 			return ctrl.Result{}, err
 		}
 
-		controllerutil.RemoveFinalizer(vpcTunnel, "tunnel.finalizer.ustc.io")
+		controllerutil.RemoveFinalizer(vpcTunnel, "tunnel.finalizer.example.io")
 		err = r.Update(ctx, vpcTunnel)
 		if err != nil {
 			log.Log.Error(err, "Error Update vpcTunnel")
 			return ctrl.Result{}, err
 		}
-		log.Log.Info("删除 VpcNatTunnel 成功: " + vpcTunnel.Name)
+		log.Log.Info("delete VpcNatTunnel success: " + vpcTunnel.Name)
 	}
 	return ctrl.Result{}, nil
 }

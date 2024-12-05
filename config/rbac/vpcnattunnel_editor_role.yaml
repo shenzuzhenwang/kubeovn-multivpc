@@ -12,7 +12,7 @@ metadata:
   name: vpcnattunnel-editor-role
 rules:
 - apiGroups:
-  - kubeovn.ustc.io
+  - xcl.example.io
   resources:
   - vpcnattunnels
   verbs:
@@ -24,7 +24,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - kubeovn.ustc.io
+  - xcl.example.io
   resources:
   - vpcnattunnels/status
   verbs:

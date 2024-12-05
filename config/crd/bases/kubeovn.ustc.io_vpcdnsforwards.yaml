@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: vpcdnsforwards.kubeovn.ustc.io
+  name: vpcdnsforwards.xcl.example.io
 spec:
-  group: kubeovn.ustc.io
+  group: xcl.example.io
   names:
     kind: VpcDnsForward
     listKind: VpcDnsForwardList
