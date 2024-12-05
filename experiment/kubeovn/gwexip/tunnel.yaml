@@ -1,0 +1,21 @@
+apiVersion: "kubeovn.ustc.io/v1"
+kind: VpcNatTunnel
+metadata:
+  name: gre6-4
+  namespace: ns2
+spec:
+  clusterId: "cluster4"  #互联的对端集群ID
+  gatewayName: "vpc2-net1-gateway"    # 互联的对端集群 vpc-gw 名字
+  interfaceAddr: "10.0.0.64/24" #隧道地址
+  natGwDp: "vpc2-net1-gateway" #vpc网关名字
+---
+apiVersion: "kubeovn.ustc.io/v1"
+kind: VpcNatTunnel
+metadata:
+  name: gre6-5
+  namespace: ns2
+spec:
+  clusterId: "cluster5"  #互联的对端集群ID
+  gatewayName: "vpc2-net1-gateway"    # 互联的对端集群 vpc-gw 名字
+  interfaceAddr: "10.0.0.65/24" #隧道地址
+  natGwDp: "vpc2-net1-gateway" #vpc网关名字
