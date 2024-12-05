@@ -1,7 +1,7 @@
 # Bucket-Based ECMP
 We have modified and recompiled OVS and OVN to implement Bucket-Based ECMP.
 
-The main modifications are as follows:
+Some modifications are as follows:
 
 In OVN: lib/actions.c
 ```c
@@ -39,9 +39,7 @@ In OVS: ofproto/ofproto-dpif-xlate.c:
 static struct ofputil_bucket *
 pick_select_group(struct xlate_ctx *ctx, struct group_dpif *group)
 {
-    /* Select groups may access flow keys beyond L2 in order to
-     * select a bucket. Recirculate as appropriate to make this possible.
-     */
+
     if (ctx->was_mpls) {
         ctx_trigger_freeze(ctx);
         return NULL;
@@ -60,7 +58,6 @@ pick_select_group(struct xlate_ctx *ctx, struct group_dpif *group)
     case SEL_METHOD_BB_HASH:
         return pick_bb_hash_select_group(ctx,group);
     default:
-        /* Parsing of groups ensures this never happens */
         OVS_NOT_REACHED();
     }
 
