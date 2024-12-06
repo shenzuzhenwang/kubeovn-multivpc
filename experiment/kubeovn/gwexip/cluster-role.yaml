@@ -65,7 +65,7 @@ rules:
       - get
       - list
   - apiGroups:
-      - kubeovn.ustc.io
+      - kubeovn.example.io
     resources:
       - gatewayexips
     verbs:

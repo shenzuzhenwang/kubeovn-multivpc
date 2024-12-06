@@ -41,26 +41,7 @@ const (
 	retrieveIptablesVersion = "get-iptables-version"
 )
 
-// type Controller struct {
-
-// 	// ExternalGatewayType define external gateway type, centralized
-// 	ExternalGatewayType string
-
-// 	podsLister             corelister.PodLister
-// 	podsSynced             cache.InformerSynced
-// 	addOrUpdatePodQueue    workqueue.RateLimitingInterface
-// 	deletePodQueue         workqueue.RateLimitingInterface
-// 	deletingPodObjMap      *sync.Map
-// 	updatePodSecurityQueue workqueue.RateLimitingInterface
-
-// 	natGatewayLister           lister.VpcNatGatewayLister
-// 	natGatewaySynced           cache.InformerSynced
-// 	addOrUpdateNatGatewayQueue workqueue.RateLimitingInterface
-// 	deleteNatGatewayQueue         workqueue.RateLimitingInterface
-// 	initVpcNatGatewayQueue        workqueue.RateLimitingInterface
-// }
-
-func (c *Controller) syncNatGatewayConfig() {
+func (c *controller) syncNatGatewayConfig() {
 	configMap, err := c.configMapsLister.ConfigMaps(c.config.PodNamespace).Get(util.NatGatewayConfig)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		klog.Errorf("failed to get nat-gateway-config, %v", err)
@@ -101,7 +82,7 @@ func (c *Controller) syncNatGatewayConfig() {
 	klog.Info("finished setting up nat-gateway")
 }
 
-func (c *Controller) handleDeleteNatGw(key string) error {
+func (c *controller) handleDeleteNatGw(key string) error {
 	c.natGwKeyMutex.LockKey(key)
 	defer func() { _ = c.natGwKeyMutex.UnlockKey(key) }()
 	name := util.GenerateNatGwStsName(key)
@@ -116,7 +97,7 @@ func (c *Controller) handleDeleteNatGw(key string) error {
 	return nil
 }
 
-func (c *Controller) enqueueNatGwCreation(obj interface{}) {
+func (c *controller) enqueueNatGwCreation(obj interface{}) {
 	var key string
 	var err error
 	if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
@@ -127,7 +108,7 @@ func (c *Controller) enqueueNatGwCreation(obj interface{}) {
 	c.addOrUpdateNatGatewayQueue.Add(key)
 }
 
-func (c *Controller) enqueueNatGwUpdate(_, newObj interface{}) {
+func (c *controller) enqueueNatGwUpdate(_, newObj interface{}) {
 	var key string
 	var err error
 	if key, err = cache.MetaNamespaceKeyFunc(newObj); err != nil {
@@ -138,7 +119,7 @@ func (c *Controller) enqueueNatGwUpdate(_, newObj interface{}) {
 	c.addOrUpdateNatGatewayQueue.Add(key)
 }
 
-func (c *Controller) enqueueNatGwDeletion(obj interface{}) {
+func (c *controller) enqueueNatGwDeletion(obj interface{}) {
 	var key string
 	var err error
 	if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
@@ -149,17 +130,17 @@ func (c *Controller) enqueueNatGwDeletion(obj interface{}) {
 	c.deleteNatGatewayQueue.Add(key)
 }
 
-func (c *Controller) runNatGwAddOrUpdateWorker() {
+func (c *controller) runNatGwAddOrUpdateWorker() {
 	for c.processNextQueueItem("addOrUpdateNatGateway", c.addOrUpdateNatGatewayQueue, c.handleAddOrUpdateNatGw) {
 	}
 }
 
-func (c *Controller) runNatGwDeletionWorker() {
+func (c *controller) runNatGwDeletionWorker() {
 	for c.processNextQueueItem("deleteNatGateway", c.deleteNatGatewayQueue, c.handleDeleteNatGw) {
 	}
 }
 
-func (c *Controller) processNextQueueItem(name string, queue workqueue.RateLimitingInterface, handler func(key string) error) bool {
+func (c *controller) processNextQueueItem(name string, queue workqueue.RateLimitingInterface, handler func(key string) error) bool {
 	obj, shutdown := queue.Get()
 	if shutdown {
 		return false
@@ -188,7 +169,7 @@ func (c *Controller) processNextQueueItem(name string, queue workqueue.RateLimit
 	return true
 }
 
-func (c *Controller) handleAddOrUpdateNatGw(key string) error {
+func (c *controller) handleAddOrUpdateNatGw(key string) error {
 	c.natGwKeyMutex.LockKey(key)
 	defer func() { _ = c.natGwKeyMutex.UnlockKey(key) }()
 	klog.Infof("handling add/update for nat gateway %s", key)
@@ -261,7 +242,7 @@ func (c *Controller) handleAddOrUpdateNatGw(key string) error {
 	return nil
 }
 
-func (c *Controller) cleanUpNatGateway() error {
+func (c *controller) cleanUpNatGateway() error {
 	gateways, err := c.natGatewayLister.List(labels.Everything())
 	if err != nil {
 		klog.Errorf("failed to list nat gateways, %v", err)
@@ -295,7 +276,7 @@ func isNatGwModified(gw *apiv1.VpcNatGateway) bool {
 
 var natGwImage = ""
 
-func (c *Controller) syncNatGatewayImage() error {
+func (c *controller) syncNatGatewayImage() error {
 	cm, err := c.configMapsLister.ConfigMaps(c.config.PodNamespace).Get(util.VpcNatConfig)
 	if err != nil {
 		err = fmt.Errorf("failed to get ovn-vpc-nat-config, %v", err)
@@ -312,7 +293,7 @@ func (c *Controller) syncNatGatewayImage() error {
 	return nil
 }
 
-func (c *Controller) generateNatGwStatefulSet(gw *apiv1.VpcNatGateway, oldSts *v1.StatefulSet) *v1.StatefulSet {
+func (c *controller) generateNatGwStatefulSet(gw *apiv1.VpcNatGateway, oldSts *v1.StatefulSet) *v1.StatefulSet {
 	replicas := int32(1)
 	name := util.GenerateNatGwStsName(gw.Name)
 	privEscalation := true
@@ -429,7 +410,7 @@ func (c *Controller) generateNatGwStatefulSet(gw *apiv1.VpcNatGateway, oldSts *v
 // 	return nil
 // }
 
-func (c *Controller) updateVpcNatGwStatefulSet(gw *apiv1.VpcNatGateway) error {
+func (c *controller) updateVpcNatGwStatefulSet(gw *apiv1.VpcNatGateway) error {
 	name := util.GenNatGwStsName(gw.Name)
 	statefulSet, err := c.config.KubeClient.AppsV1().StatefulSets(c.config.PodNamespace).Get(context.Background(),
 		name, metav1.GetOptions{})
@@ -453,7 +434,7 @@ func (c *Controller) updateVpcNatGwStatefulSet(gw *apiv1.VpcNatGateway) error {
 	return nil
 }
 
-func (c *Controller) createOrUpdateVpcNatGwResources(gw *apiv1.VpcNatGateway) error {
+func (c *controller) createOrUpdateVpcNatGwResources(gw *apiv1.VpcNatGateway) error {
 	// Ensure the necessary services and IPs are created or updated for the VPC NAT Gateway
 	if err := c.ensureVpcNatGwServices(gw); err != nil {
 		return fmt.Errorf("failed to ensure services for VPC NAT Gateway %s: %v", gw.Name, err)
@@ -466,7 +447,7 @@ func (c *Controller) createOrUpdateVpcNatGwResources(gw *apiv1.VpcNatGateway) er
 	return nil
 }
 
-func (c *Controller) ensureVpcNatGwServices(gw *apiv1.VpcNatGateway) error {
+func (c *controller) ensureVpcNatGwServices(gw *apiv1.VpcNatGateway) error {
 	// Ensure the service for the VPC NAT Gateway is created or updated
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -492,7 +473,7 @@ func (c *Controller) ensureVpcNatGwServices(gw *apiv1.VpcNatGateway) error {
 	return nil
 }
 
-func (c *Controller) ensureVpcNatGwIPs(gw *apiv1.VpcNatGateway) error {
+func (c *controller) ensureVpcNatGwIPs(gw *apiv1.VpcNatGateway) error {
 	// Ensure the floating IPs and other IP resources are created or updated
 	if gw.Spec.FloatingIP != "" {
 		if err := c.createOrUpdateVpcNatGwFloatingIP(gw); err != nil {
@@ -504,7 +485,7 @@ func (c *Controller) ensureVpcNatGwIPs(gw *apiv1.VpcNatGateway) error {
 	return nil
 }
 
-func (c *Controller) createOrUpdateVpcNatGwFloatingIP(gw *apiv1.VpcNatGateway) error {
+func (c *controller) createOrUpdateVpcNatGwFloatingIP(gw *apiv1.VpcNatGateway) error {
 	// Create or update floating IP for the VPC NAT Gateway
 	fip := &apiv1.FloatingIP{
 		ObjectMeta: metav1.ObjectMeta{
@@ -524,7 +505,7 @@ func (c *Controller) createOrUpdateVpcNatGwFloatingIP(gw *apiv1.VpcNatGateway) e
 	klog.Infof("Successfully created/updated floating IP for VPC NAT Gateway %s", gw.Name)
 	return nil
 }
-func (c *Controller) handleUpdateVpcFloatingIP(key string) error {
+func (c *controller) handleUpdateVpcFloatingIP(key string) error {
 	// Handle the update for VPC Floating IP
 	c.vpcNatGwKeyMutex.LockKey(key)
 	defer func() { _ = c.vpcNatGwKeyMutex.UnlockKey(key) }()
@@ -556,7 +537,7 @@ func (c *Controller) handleUpdateVpcFloatingIP(key string) error {
 	return nil
 }
 
-func (c *Controller) handleUpdateVpcEip(key string) error {
+func (c *controller) handleUpdateVpcEip(key string) error {
 	// Handle the update for VPC EIP (Elastic IP)
 	c.vpcNatGwKeyMutex.LockKey(key)
 	defer func() { _ = c.vpcNatGwKeyMutex.UnlockKey(key) }()
@@ -582,7 +563,7 @@ func (c *Controller) handleUpdateVpcEip(key string) error {
 	return nil
 }
 
-func (c *Controller) handleUpdateVpcDnat(key string) error {
+func (c *controller) handleUpdateVpcDnat(key string) error {
 	// Handle the update for VPC DNAT (Destination NAT)
 	c.vpcNatGwKeyMutex.LockKey(key)
 	defer func() { _ = c.vpcNatGwKeyMutex.UnlockKey(key) }()
@@ -608,7 +589,7 @@ func (c *Controller) handleUpdateVpcDnat(key string) error {
 	return nil
 }
 
-func (c *Controller) handleUpdateVpcSnat(key string) error {
+func (c *controller) handleUpdateVpcSnat(key string) error {
 	// Handle the update for VPC SNAT (Source NAT)
 	c.vpcNatGwKeyMutex.LockKey(key)
 	defer func() { _ = c.vpcNatGwKeyMutex.UnlockKey(key) }()
@@ -634,28 +615,28 @@ func (c *Controller) handleUpdateVpcSnat(key string) error {
 	return nil
 }
 
-func (c *Controller) updateVpcNatGwDnat(gw *apiv1.VpcNatGateway) error {
+func (c *controller) updateVpcNatGwDnat(gw *apiv1.VpcNatGateway) error {
 	// Update the DNAT configuration for the VPC NAT Gateway
 	klog.Infof("Updating DNAT for VPC NAT Gateway %s", gw.Name)
 	// Add your DNAT update logic here
 	return nil
 }
 
-func (c *Controller) updateVpcNatGwSnat(gw *apiv1.VpcNatGateway) error {
+func (c *controller) updateVpcNatGwSnat(gw *apiv1.VpcNatGateway) error {
 	// Update the SNAT configuration for the VPC NAT Gateway
 	klog.Infof("Updating SNAT for VPC NAT Gateway %s", gw.Name)
 	// Add your SNAT update logic here
 	return nil
 }
 
-func (c *Controller) createOrUpdateVpcNatGwEIP(gw *apiv1.VpcNatGateway) error {
+func (c *controller) createOrUpdateVpcNatGwEIP(gw *apiv1.VpcNatGateway) error {
 	// Create or update EIP for the VPC NAT Gateway
 	klog.Infof("Creating or updating EIP for VPC NAT Gateway %s", gw.Name)
 	// Add your EIP creation/update logic here
 	return nil
 }
 
-func (c *Controller) handleUpdateVpcSubnetRoute(key string) error {
+func (c *controller) handleUpdateVpcSubnetRoute(key string) error {
 	// Handle the update for VPC Subnet Route
 	c.vpcNatGwKeyMutex.LockKey(key)
 	defer func() { _ = c.vpcNatGwKeyMutex.UnlockKey(key) }()
@@ -681,13 +662,13 @@ func (c *Controller) handleUpdateVpcSubnetRoute(key string) error {
 	return nil
 }
 
-func (c *Controller) updateVpcNatGwSubnetRoute(gw *apiv1.VpcNatGateway) error {
+func (c *controller) updateVpcNatGwSubnetRoute(gw *apiv1.VpcNatGateway) error {
 	// Update the subnet route for the VPC NAT Gateway
 	klog.Infof("Updating subnet route for VPC NAT Gateway %s", gw.Name)
 	// Add your subnet route update logic here
 	return nil
 }
-func (c *Controller) handleUpdateVpcNATRule(key string) error {
+func (c *controller) handleUpdateVpcNATRule(key string) error {
 	// Handle the update for VPC NAT rule (DNAT, SNAT)
 	c.vpcNatGwKeyMutex.LockKey(key)
 	defer func() { _ = c.vpcNatGwKeyMutex.UnlockKey(key) }()
@@ -713,14 +694,14 @@ func (c *Controller) handleUpdateVpcNATRule(key string) error {
 	return nil
 }
 
-func (c *Controller) updateVpcNatGwNATRule(gw *apiv1.VpcNatGateway) error {
+func (c *controller) updateVpcNatGwNATRule(gw *apiv1.VpcNatGateway) error {
 	// Update the NAT rule configuration for the VPC NAT Gateway
 	klog.Infof("Updating NAT rule for VPC NAT Gateway %s", gw.Name)
 	// Implement your logic for updating the NAT rule (e.g., add/update DNAT/SNAT rules)
 	return nil
 }
 
-func (c *Controller) handleUpdateVpcSubnet(key string) error {
+func (c *controller) handleUpdateVpcSubnet(key string) error {
 	// Handle the update for VPC subnet
 	c.vpcNatGwKeyMutex.LockKey(key)
 	defer func() { _ = c.vpcNatGwKeyMutex.UnlockKey(key) }()
@@ -746,14 +727,14 @@ func (c *Controller) handleUpdateVpcSubnet(key string) error {
 	return nil
 }
 
-func (c *Controller) updateVpcNatGwSubnet(subnet *apiv1.VpcSubnet) error {
+func (c *controller) updateVpcNatGwSubnet(subnet *apiv1.VpcSubnet) error {
 	// Update the subnet configuration for the VPC NAT Gateway
 	klog.Infof("Updating subnet for VPC NAT Gateway %s", subnet.Name)
 	// Implement logic for updating subnet-specific configurations here
 	return nil
 }
 
-func (c *Controller) handleUpdateVpcNatRuleMapping(key string) error {
+func (c *controller) handleUpdateVpcNatRuleMapping(key string) error {
 	// Handle the update for VPC NAT rule mapping (DNAT/SNAT rules mapping)
 	c.vpcNatGwKeyMutex.LockKey(key)
 	defer func() { _ = c.vpcNatGwKeyMutex.UnlockKey(key) }()
@@ -779,14 +760,14 @@ func (c *Controller) handleUpdateVpcNatRuleMapping(key string) error {
 	return nil
 }
 
-func (c *Controller) updateVpcNatGwNatRuleMapping(gw *apiv1.VpcNatGateway) error {
+func (c *controller) updateVpcNatGwNatRuleMapping(gw *apiv1.VpcNatGateway) error {
 	// Update the NAT rule mapping configuration for the VPC NAT Gateway
 	klog.Infof("Updating NAT rule mapping for VPC NAT Gateway %s", gw.Name)
 	// Implement your logic to update rule mappings (DNAT/SNAT rule mappings)
 	return nil
 }
 
-func (c *Controller) handleUpdateVpcNatGateway(key string) error {
+func (c *controller) handleUpdateVpcNatGateway(key string) error {
 	// Handle the update for VPC NAT Gateway
 	c.vpcNatGwKeyMutex.LockKey(key)
 	defer func() { _ = c.vpcNatGwKeyMutex.UnlockKey(key) }()
@@ -812,14 +793,14 @@ func (c *Controller) handleUpdateVpcNatGateway(key string) error {
 	return nil
 }
 
-func (c *Controller) updateVpcNatGw(gw *apiv1.VpcNatGateway) error {
+func (c *controller) updateVpcNatGw(gw *apiv1.VpcNatGateway) error {
 	// Update the VPC NAT Gateway configuration
 	klog.Infof("Updating VPC NAT Gateway %s", gw.Name)
 	// Implement logic to update the gateway configuration (e.g., floating IP, EIP, SNAT, DNAT)
 	return nil
 }
 
-func (c *Controller) handleDeleteVpcNatGateway(key string) error {
+func (c *controller) handleDeleteVpcNatGateway(key string) error {
 	// Handle the delete for VPC NAT Gateway
 	c.vpcNatGwKeyMutex.LockKey(key)
 	defer func() { _ = c.vpcNatGwKeyMutex.UnlockKey(key) }()
@@ -845,13 +826,13 @@ func (c *Controller) handleDeleteVpcNatGateway(key string) error {
 	return nil
 }
 
-func (c *Controller) deleteVpcNatGw(gw *apiv1.VpcNatGateway) error {
+func (c *controller) deleteVpcNatGw(gw *apiv1.VpcNatGateway) error {
 	// Delete the VPC NAT Gateway configuration
 	klog.Infof("Deleting VPC NAT Gateway %s", gw.Name)
 	// Implement the logic for deleting VPC NAT Gateway and associated resources
 	return nil
 }
-func (c *Controller) handleCreateVpcNatGateway(key string) error {
+func (c *controller) handleCreateVpcNatGateway(key string) error {
 	// Handle the creation of a VPC NAT Gateway
 	c.vpcNatGwKeyMutex.LockKey(key)
 	defer func() { _ = c.vpcNatGwKeyMutex.UnlockKey(key) }()
@@ -877,14 +858,14 @@ func (c *Controller) handleCreateVpcNatGateway(key string) error {
 	return nil
 }
 
-func (c *Controller) createVpcNatGw(gw *apiv1.VpcNatGateway) error {
+func (c *controller) createVpcNatGw(gw *apiv1.VpcNatGateway) error {
 	// Create the VPC NAT Gateway
 	klog.Infof("Creating VPC NAT Gateway %s", gw.Name)
 	// Implement logic for creating the NAT Gateway (e.g., configuring resources, associating rules)
 	return nil
 }
 
-func (c *Controller) handleUpdateVpcNatGwAttachment(key string) error {
+func (c *controller) handleUpdateVpcNatGwAttachment(key string) error {
 	// Handle the update for VPC NAT Gateway attachment
 	c.vpcNatGwKeyMutex.LockKey(key)
 	defer func() { _ = c.vpcNatGwKeyMutex.UnlockKey(key) }()
@@ -910,14 +891,14 @@ func (c *Controller) handleUpdateVpcNatGwAttachment(key string) error {
 	return nil
 }
 
-func (c *Controller) updateVpcNatGwAttachment(attachment *apiv1.VpcNatGwAttachment) error {
+func (c *controller) updateVpcNatGwAttachment(attachment *apiv1.VpcNatGwAttachment) error {
 	// Update the VPC NAT Gateway attachment configuration
 	klog.Infof("Updating VPC NAT Gateway attachment %s", attachment.Name)
 	// Implement logic for updating attachment settings
 	return nil
 }
 
-func (c *Controller) handleDeleteVpcNatGwAttachment(key string) error {
+func (c *controller) handleDeleteVpcNatGwAttachment(key string) error {
 	// Handle the deletion of VPC NAT Gateway attachment
 	c.vpcNatGwKeyMutex.LockKey(key)
 	defer func() { _ = c.vpcNatGwKeyMutex.UnlockKey(key) }()
@@ -943,14 +924,14 @@ func (c *Controller) handleDeleteVpcNatGwAttachment(key string) error {
 	return nil
 }
 
-func (c *Controller) deleteVpcNatGwAttachment(attachment *apiv1.VpcNatGwAttachment) error {
+func (c *controller) deleteVpcNatGwAttachment(attachment *apiv1.VpcNatGwAttachment) error {
 	// Delete the VPC NAT Gateway attachment
 	klog.Infof("Deleting VPC NAT Gateway attachment %s", attachment.Name)
 	// Implement logic for deleting the attachment and detaching from resources
 	return nil
 }
 
-func (c *Controller) handleUpdateVpcNATRulePolicy(key string) error {
+func (c *controller) handleUpdateVpcNATRulePolicy(key string) error {
 	// Handle the update for VPC NAT rule policy (e.g., access control policies)
 	c.vpcNatGwKeyMutex.LockKey(key)
 	defer func() { _ = c.vpcNatGwKeyMutex.UnlockKey(key) }()
@@ -976,14 +957,14 @@ func (c *Controller) handleUpdateVpcNATRulePolicy(key string) error {
 	return nil
 }
 
-func (c *Controller) updateVpcNatGwRulePolicy(policy *apiv1.VpcNatGwPolicy) error {
+func (c *controller) updateVpcNatGwRulePolicy(policy *apiv1.VpcNatGwPolicy) error {
 	// Update the VPC NAT Gateway rule policy configuration
 	klog.Infof("Updating NAT rule policy for VPC NAT Gateway %s", policy.Name)
 	// Implement logic for updating the NAT rule policy
 	return nil
 }
 
-func (c *Controller) handleDeleteVpcNATRulePolicy(key string) error {
+func (c *controller) handleDeleteVpcNATRulePolicy(key string) error {
 	// Handle the deletion of VPC NAT rule policy
 	c.vpcNatGwKeyMutex.LockKey(key)
 	defer func() { _ = c.vpcNatGwKeyMutex.UnlockKey(key) }()
@@ -1009,7 +990,7 @@ func (c *Controller) handleDeleteVpcNATRulePolicy(key string) error {
 	return nil
 }
 
-func (c *Controller) deleteVpcNatGwRulePolicy(policy *apiv1.VpcNatGwPolicy) error {
+func (c *controller) deleteVpcNatGwRulePolicy(policy *apiv1.VpcNatGwPolicy) error {
 	// Delete the VPC NAT Gateway rule policy configuration
 	klog.Infof("Deleting NAT rule policy for VPC NAT Gateway %s", policy.Name)
 	// Implement logic for deleting NAT rule policies

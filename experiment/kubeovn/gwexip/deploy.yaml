@@ -16,9 +16,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: gatewayexips.kubeovn.ustc.io
+  name: gatewayexips.kubeovn.example.io
 spec:
-  group: kubeovn.ustc.io
+  group: kubeovn.example.io
   names:
     kind: GatewayExIp
     listKind: GatewayExIpList
@@ -70,9 +70,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: vpcdnsforwards.kubeovn.ustc.io
+  name: vpcdnsforwards.kubeovn.example.io
 spec:
-  group: kubeovn.ustc.io
+  group: kubeovn.example.io
   names:
     kind: VpcDnsForward
     listKind: VpcDnsForwardList
@@ -122,9 +122,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: vpcnattunnels.kubeovn.ustc.io
+  name: vpcnattunnels.kubeovn.example.io
 spec:
-  group: kubeovn.ustc.io
+  group: kubeovn.example.io
   names:
     kind: VpcNatTunnel
     listKind: VpcNatTunnelList
@@ -374,7 +374,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - kubeovn.ustc.io
+  - kubeovn.example.io
   resources:
   - gatewayexips
   verbs:
@@ -386,13 +386,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - kubeovn.ustc.io
+  - kubeovn.example.io
   resources:
   - gatewayexips/finalizers
   verbs:
   - update
 - apiGroups:
-  - kubeovn.ustc.io
+  - kubeovn.example.io
   resources:
   - gatewayexips/status
   verbs:
@@ -400,7 +400,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - kubeovn.ustc.io
+  - kubeovn.example.io
   resources:
   - vpcdnsforwards
   verbs:
@@ -412,13 +412,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - kubeovn.ustc.io
+  - kubeovn.example.io
   resources:
   - vpcdnsforwards/finalizers
   verbs:
   - update
 - apiGroups:
-  - kubeovn.ustc.io
+  - kubeovn.example.io
   resources:
   - vpcdnsforwards/status
   verbs:
@@ -426,7 +426,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - kubeovn.ustc.io
+  - kubeovn.example.io
   resources:
   - vpcnattunnels
   verbs:
@@ -438,13 +438,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - kubeovn.ustc.io
+  - kubeovn.example.io
   resources:
   - vpcnattunnels/finalizers
   verbs:
   - update
 - apiGroups:
-  - kubeovn.ustc.io
+  - kubeovn.example.io
   resources:
   - vpcnattunnels/status
   verbs:
@@ -672,7 +672,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: shenzuzhenwang/kubeovn-multivpc:master
+        image: xclusterlink/controller:master
         livenessProbe:
           httpGet:
             path: /healthz

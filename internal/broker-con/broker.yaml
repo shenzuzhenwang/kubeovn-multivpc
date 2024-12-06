@@ -4,7 +4,7 @@ metadata:
   name: broker1-4
   namespace: kube-system
 spec:
-  image: 'shenzuzhenwang/kubeovn-multivpc' 	# broker image
+  image: 'xclusterlink/controller' 	# broker image
   env:
     - name: BROKER
       value: "true"

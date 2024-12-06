@@ -700,7 +700,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: shenzuzhenwang/kubeovn-multivpc:master
+        image: xclusterlink/controller:master
         livenessProbe:
           httpGet:
             path: /healthz
