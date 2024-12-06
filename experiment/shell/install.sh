@@ -3876,7 +3876,7 @@ metadata:
     kubernetes.io/description: |
       kube-ovn vpc-nat common config
 data:
-  image: $REGISTRY/$VPC_NAT_IMAGE:$VERSION
+  image: docker.io/xclusterlink/$VPC_NAT_IMAGE:master
 ---
 kind: ConfigMap
 apiVersion: v1

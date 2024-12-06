@@ -46,7 +46,7 @@ CNI_CONF_DIR="/etc/cni/net.d"
 CNI_BIN_DIR="/opt/cni/bin"
 
 REGISTRY="docker.io/kubeovn"
-VPC_NAT_IMAGE="vpc-nat-gateway"
+VPC_NAT_IMAGE="gateway"
 VERSION="v1.12.3"
 IMAGE_PULL_POLICY="IfNotPresent"
 POD_CIDR="10.244.0.0/16"                # Do NOT overlap with NODE/SVC/JOIN CIDR
@@ -3876,7 +3876,7 @@ metadata:
     kubernetes.io/description: |
       kube-ovn vpc-nat common config
 data:
-  image: $REGISTRY/$VPC_NAT_IMAGE:$VERSION
+  image: docker.io/xclusterlink/$VPC_NAT_IMAGE:master
 ---
 kind: ConfigMap
 apiVersion: v1
