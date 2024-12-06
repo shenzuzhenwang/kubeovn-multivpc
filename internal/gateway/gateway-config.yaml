@@ -4,5 +4,5 @@ metadata:
   name: nat-config
   namespace: kube-system
 data:
-  image: 'shenzuzhenwang/kubeovn-multivpc' 
+  image: 'shenzuzhenwang/kubeovn-multivpc' 	# Gateway pod image
   enable-nat-gw: 'true'
