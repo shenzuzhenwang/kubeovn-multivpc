@@ -23,7 +23,7 @@ metadata:
 spec:
   containers:
   - name: vpc2-net1-gw-ecmp
-    image: docker.io/kubeovn/vpc-nat-gateway:v1.12.3
+    image: docker.io/xclusterlink/gateway:master
     imagePullPolicy: IfNotPresent
     command: ["sh", "-c", "while true; do sleep 10000; done"]
     securityContext:
